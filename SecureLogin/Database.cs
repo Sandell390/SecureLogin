@@ -6,7 +6,7 @@ using MySql.Data;
 
 public class Database
 {
-    private string connString = @"Server=127.0.0.1;Database=secure_password;Uid=root;Pwd=Muffin123;";
+    private string connString = @"Server=127.0.0.1;Database=secure_password;Uid=root;Pwd=;";
     
     public bool DoesUserExist(string username)
     {
@@ -97,9 +97,9 @@ public class Database
             cmd.Parameters.AddWithValue("@username", username);
             int id = Convert.ToInt32(cmd.ExecuteScalar());
             // Update salt
-            cmd = new MySqlCommand("UPDATE salts SET salt = @salt WHERE iduser = @id", conn);
+            cmd = new MySqlCommand("UPDATE salts SET salt = @salt WHERE userid = @userid", conn);
             cmd.Parameters.AddWithValue("@salt", salt);
-            cmd.Parameters.AddWithValue("@id", id);
+            cmd.Parameters.AddWithValue("@userid", id);
             cmd.ExecuteNonQuery();
         }
     }
@@ -131,8 +131,8 @@ public class Database
             cmd.Parameters.AddWithValue("@username", username);
             int id = Convert.ToInt32(cmd.ExecuteScalar());
             // Get salt
-            cmd = new MySqlCommand("SELECT salt FROM salts WHERE iduser = @id", conn);
-            cmd.Parameters.AddWithValue("@id", id);
+            cmd = new MySqlCommand("SELECT salt FROM salts WHERE userid = @userid", conn);
+            cmd.Parameters.AddWithValue("@userid", id);
             return cmd.ExecuteScalar().ToString();
         }
     }

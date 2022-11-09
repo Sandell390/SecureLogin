@@ -13,15 +13,19 @@
 </head>
 <body>
 <div style="text-align: center">
-
-        <label for="uname">Username: </label>
-        <input type="text" id="uname" name="uname"><br><br>
-        <label for="password1">Password: </label>
-        <input type="password" id="password1" name="password1"><br><br>
-        <label for="password2">Confirm Password: </label>
-        <input type="password" id="password2" name="password2"><br><br>
-        <button onclick="OnClick()" type="submit" class="btn btn-primary">Register!</button>
+ 
+    <label for="uname">Username: </label>
+    <input oninput="OnInputChanged()" type="text" id="uname" name="uname"><br><br>
+    <label for="password1">Password: </label>
+    <input oninput="OnInputChanged()" type="password" id="password1" name="password1"><br><br>
+    <label  for="password2">Confirm Password: </label>
+    <input oninput="OnInputChanged()" type="password" id="password2" name="password2"><br><br>
+    <label id="matchPass" style="color: red"></label><br><br>
+    <button id="registerbtn" onclick="OnRegister()" type="submit" class="btn btn-primary">Register!</button>
 
 </div>
+
+<script src="js/register.js"></script>
+
 </body>
 </html>
