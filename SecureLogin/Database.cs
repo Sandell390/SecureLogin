@@ -87,7 +87,7 @@ public class Database
         }
     }
 
-    public void UpdateSalt(string username, string salt)
+    public void UpdatePepper(string username, string pepper)
     {
         using (MySqlConnection conn = new MySqlConnection(connString))
         {
@@ -96,15 +96,15 @@ public class Database
             MySqlCommand cmd = new MySqlCommand("SELECT iduser FROM users WHERE username = @username", conn);
             cmd.Parameters.AddWithValue("@username", username);
             int id = Convert.ToInt32(cmd.ExecuteScalar());
-            // Update salt
-            cmd = new MySqlCommand("UPDATE salts SET salt = @salt WHERE userid = @userid", conn);
-            cmd.Parameters.AddWithValue("@salt", salt);
+            // Update Pepper
+            cmd = new MySqlCommand("UPDATE peppers SET pepper = @pepper WHERE userid = @userid", conn);
+            cmd.Parameters.AddWithValue("@pepper", pepper);
             cmd.Parameters.AddWithValue("@userid", id);
             cmd.ExecuteNonQuery();
         }
     }
 
-    public void RegisterSalt(string username, string salt)
+    public void RegisterPepper(string username, string pepper)
     {
         using (MySqlConnection conn = new MySqlConnection(connString))
         {
@@ -113,15 +113,15 @@ public class Database
             MySqlCommand cmd = new MySqlCommand("SELECT iduser FROM users WHERE username = @username", conn);
             cmd.Parameters.AddWithValue("@username", username);
             int id = Convert.ToInt32(cmd.ExecuteScalar());
-            // Update salt
-            cmd = new MySqlCommand("INSERT INTO salts (salt, userid) VALUES (@salt, @userid)", conn);
-            cmd.Parameters.AddWithValue("@salt", salt);
+            // Update Pepper
+            cmd = new MySqlCommand("INSERT INTO peppers (pepper, userid) VALUES (@pepper, @userid)", conn);
+            cmd.Parameters.AddWithValue("@pepper", pepper);
             cmd.Parameters.AddWithValue("@userid", id);
             cmd.ExecuteNonQuery();
         }
     }
     
-    public string GetSalt(string username)
+    public string GetPepper(string username)
     {
         using (MySqlConnection conn = new MySqlConnection(connString))
         {
@@ -130,8 +130,8 @@ public class Database
             MySqlCommand cmd = new MySqlCommand("SELECT iduser FROM users WHERE username = @username", conn);
             cmd.Parameters.AddWithValue("@username", username);
             int id = Convert.ToInt32(cmd.ExecuteScalar());
-            // Get salt
-            cmd = new MySqlCommand("SELECT salt FROM salts WHERE userid = @userid", conn);
+            // Get Pepper
+            cmd = new MySqlCommand("SELECT pepper FROM peppers WHERE userid = @userid", conn);
             cmd.Parameters.AddWithValue("@userid", id);
             return cmd.ExecuteScalar().ToString();
         }

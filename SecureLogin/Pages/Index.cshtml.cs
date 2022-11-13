@@ -16,10 +16,5 @@ namespace SecureLogin.Pages
         {
 
         }
-        public void OnPost()
-        {
-            HttpPostAttribute hej = new HttpPostAttribute();
-            Console.WriteLine(HttpContext.Request.Form.Count);
-        }
     }
 }

@@ -8,6 +8,8 @@ public class RegisterController : Controller
 {
     Database db = new Database();
     
+    static Dictionary<string,string> users = new Dictionary<string,string>();
+
     [HttpPost]
     public string RegisterUser([FromBody] User user)
     {
@@ -18,20 +20,20 @@ public class RegisterController : Controller
             return "Username already exists";
         }
 
-        string passwordHash = user.Password.Substring(0, 64);
-        string passwordSalt = user.Password.Substring(64, 44);
-        
-        db.Register(user.Username, passwordHash + passwordSalt);
-        db.RegisterSalt(user.Username, passwordSalt);
-        
+        db.Register(user.Username, user.Password);
+        db.RegisterPepper(user.Username, users[user.Username]);
+        users.Remove(user.Username);
         Console.WriteLine("User registered");
         return "Success";
     }
     
     [HttpPost]
-    public string RequestSalt()
+    public string RequestPepper([FromBody] User user)
     {
-        return Hashing.GenerateSalt();
+        Console.WriteLine("Requesting Pepper");
+        string pepper = Hashing.GeneratePepper();
+        users.Add(user.Username, pepper);
+        return pepper;
     }
     
 }

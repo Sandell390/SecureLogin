@@ -1,22 +1,4 @@
-﻿document.getElementById("loginbtn").disabled = true;
-
-function OnInputChanged(){
-    let password = document.getElementById("password").value;
-    let username = document.getElementById("uname").value;
-    
-    let res = ValidPassword(password);
-    
-    if (res){
-        document.getElementById("password").style.backgroundColor = "rgba(0, 255, 0, 0.2)";
-        
-        if (username != ""){
-            document.getElementById("loginbtn").disabled = false;
-        }
-        
-    } else if (password != ""){
-        document.getElementById("password").style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-    }
-}
+﻿
 
 async function OnLogin(){
     
@@ -25,27 +7,35 @@ async function OnLogin(){
 
     let inputBytes = new TextEncoder().encode(password);
 
-    let hashedPassword = await window.crypto.subtle.digest("SHA-256", inputBytes);
-    
-    let salt = await makeRequest('POST', '/Index/RequestSalt', JSON.stringify({ username: username, password: "" }));
-    
-    if (salt == "Username does not exist"){
-        document.getElementById("uname").style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-        document.getElementById("loginbtn").disabled = true;
-        document.getElementById("uname").value = "";
-        document.getElementById("uname").placeholder = "Username does not exist";
+    let pepper = await makeRequest('POST', '/Index/RequestPepper', JSON.stringify({username: username}));
+    let pepperBytes = new TextEncoder().encode(pepper);
+    if (pepper == "failed")
+    {
+        alert("Failed to login");
         return;
     }
     
-    let response = await makeRequest('POST', '/Index/Login', JSON.stringify({ username: username, password: buf2hex(hashedPassword) + salt }));
+    let hashedPassword = await window.crypto.subtle.digest("SHA-256", inputBytes);
+    
+    let hashedPasswordWithPepper = await window.crypto.subtle.digest("SHA-256", MergeArrayBuffer(hashedPassword, pepperBytes));
+
+    let response = await makeRequest('POST', '/Index/Login', JSON.stringify({ username: username, password: buf2hex(hashedPasswordWithPepper) }));
     
     console.log(response);
-    if (response == "success"){ 
-        window.location.href = "/Privacy";
+    if (response.includes("success")){ 
+        
+        // Get the pepper from the response
+        let pepper = response.split(":")[1];
+        let pepperBytes = new TextEncoder().encode(pepper);
+
+        // Hashing the new pepper with the password
+        let newHashedPassword = await window.crypto.subtle.digest("SHA-256", MergeArrayBuffer(hashedPassword, pepperBytes));
+        
+        // Sending the new pepper with the password to the server so the server can update the hashed password with the new pepper
+        let response2 = await makeRequest('POST', '/Index/UpdatePepper', JSON.stringify({ username: username, password: buf2hex(newHashedPassword) }));
+        window.location.href = response2;
+        
     } else if (response == "failed"){
-        document.getElementById("password").style.backgroundColor = "rgba(255, 0, 0, 0.2)";
-        document.getElementById("loginbtn").disabled = true;
-        document.getElementById("password").value = "";
-        document.getElementById("password").placeholder = "Incorrect password";
+        alert("Failed to login");
     }
 }

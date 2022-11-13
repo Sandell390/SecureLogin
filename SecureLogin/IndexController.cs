@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace SecureLogin;
 
@@ -11,28 +12,42 @@ public class IndexController : Controller
     [HttpPost]
     public string Login([FromBody] User user)
     {
-        string userPassword = db.GetPassHash(user.Username);
-        
-        bool result = Hashing.VerifyPassword(userPassword,db.GetSalt(user.Username), user.Password);
+        Console.WriteLine("User Password: " + user.Password);
+        string dbpasswordWithPepper = db.GetPassHash(user.Username);
 
-        string newSalt = Hashing.GenerateSalt();
-        string password = userPassword.Substring(0, 64);
+        if (string.IsNullOrEmpty(dbpasswordWithPepper))
+        {
+            return "failed";
+        }
         
-        
-        db.UpdateSalt(user.Username, newSalt);
-        db.UpdatePassHash(user.Username, password + newSalt);
-
-        return result == true ? "success" : "failed";
+        if (dbpasswordWithPepper == user.Password)
+        {
+            string newPepper = Hashing.GeneratePepper();
+            db.UpdatePepper(user.Username, newPepper);
+            return "success:" + newPepper;
+        }
+        else
+        {
+            return "failed";
+        }
     }
 
     [HttpPost]
-    public string RequestSalt([FromBody] User user)
+    public string RequestPepper([FromBody] User user)
     {
         if (db.DoesUserExist(user.Username))
         {
-            return db.GetSalt(user.Username);
+            return db.GetPepper(user.Username);
         }
-
-        return "Username does not exist";
+        else
+        {
+            return "failed";
+        }
+    }
+    
+    public string UpdatePepper([FromBody] User user)
+    {
+        db.UpdatePassHash(user.Username, user.Password);
+        return "/Privacy";
     }
 }

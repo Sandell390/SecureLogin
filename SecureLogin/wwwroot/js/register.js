@@ -10,11 +10,15 @@ async function OnRegister(){
 
     let inputBytes = new TextEncoder().encode(password);
 
+    let pepper = await makeRequest('POST', '/Register/RequestPepper', JSON.stringify({username: username, password: null}));
+    let pepperBytes = new TextEncoder().encode(pepper);
+    
+    
     let hashedPassword = await window.crypto.subtle.digest("SHA-256", inputBytes);
 
-    let salt = await makeRequest('POST', '/Register/RequestSalt', null);
-
-    let response = await makeRequest('POST', '/Register/RegisterUser', JSON.stringify({ username: username, password: buf2hex(hashedPassword) + salt }));
+    let hashedPasswordWithPepper = await window.crypto.subtle.digest("SHA-256", MergeArrayBuffer(hashedPassword, pepperBytes));
+    
+    let response = await makeRequest('POST', '/Register/RegisterUser', JSON.stringify({ username: username, password: buf2hex(hashedPasswordWithPepper) }));
 
     console.log(response);
     if (response == "Success"){
@@ -26,9 +30,6 @@ async function OnRegister(){
         document.getElementById("uname").placeholder = "Username already exists";
     }
 }
-
-
-
 
 // regex for username: must be 3 to 20 characters long, and must not contain any spaces, special characters, or emoji.
 function OnInputChanged() {
